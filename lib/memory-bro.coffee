@@ -42,8 +42,9 @@ module.exports = MemoryBro =
                # Check to see if malloc() is embedded in a 'for loop'
                if /(for \()/.test(text_array[prev_line])
                   line_array = text_array[prev_line].split(" ")  # split text buffer by space
-                  num_iter = -1
-                  start_iter = -1
+                  num_iter = 0  # number at which the loop ends
+                  start_iter = 0  # number at which the loop starts
+                  # Iterate through each line to obtain the num_iter and start_iter values
                   for item, i in line_array
                      if line_array[i] == "="
                         start_iter_loc = i + 1
@@ -52,8 +53,21 @@ module.exports = MemoryBro =
 
                      if line_array[i] == "<"
                         iter_loc = i + 1
+                        # number of iterations is stored in a variable
                         if /[a-z]/.test(line_array[iter_loc])
-                           console.log "Is variable: " + line_array[iter_loc]
+                           variable = line_array[iter_loc].replace(';', '')
+                           console.log "Is variable: " + variable
+                           re = new RegExp("int " + variable + " = ", "g")
+
+                           for line in text_array
+                              if re.test(line)
+                                 l_array = line.split(" ")
+                                 for w, j in l_array
+                                    if l_array[j] == "="
+                                       var_loc = j + 1
+                                       num_iter = parseInt(l_array[var_loc], 10)
+
+                        # number of iterations is explicity declared
                         else
                            num_iter = parseInt(line_array[iter_loc], 10)
                            console.log "Num iter =  " + num_iter;
