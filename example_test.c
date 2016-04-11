@@ -4,14 +4,18 @@ int int main(int argc, char const * argv[]) {
 
    printf("Hello World\n");
 
-   char ** first_names = malloc(10 * sizeof(char *))
-   char ** last_names = malloc(10 * sizeof(char *))
+   // char ** first_names = malloc(10 * sizeof(char *))
+   // char ** last_names = malloc(10 * sizeof(char *))
 
    int num_words = 10;
    int i;
    for (i = 0; i < num_words; i++) {
       first_names[i] = malloc(512 * sizeof(char));
-      last_names[i] = malloc(512 * sizeof(char));
+      // last_names[i] = malloc(512 * sizeof(char));
+
+      for (j = 0; j < 23; j++) {
+         j =+ 12;
+      }
 
       strcpy(first_names[i], "Donald");
       strcpy(last_names[i], "Trump");
