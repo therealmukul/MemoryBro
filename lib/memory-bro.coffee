@@ -74,6 +74,7 @@ module.exports = MemoryBro =
       for i in [start_index + 1...text_array.length]
          _depth = 0
          for word in text_array[i].split(" ")
+
             if word == ""
                _depth = _depth + 1
             else
@@ -87,6 +88,7 @@ module.exports = MemoryBro =
       loop_info.push(start_index)
       loop_info.push(end_index)
       loop_info.push(num_iters)
+      loop_info.push(0)
 
       return loop_info
 
@@ -102,72 +104,57 @@ module.exports = MemoryBro =
          return loop_infos
 
 
+   postProcessLoopInfos: (loop_infos) ->
+      for lp, index in loop_infos
+         if index == 0
+            lp[3] = 1
+         else
+            prev_loop = loop_infos[index - 1]
+            if lp[0] > prev_loop[0] and lp[0] < prev_loop[1] and lp[1] > prev_loop[0] and lp[1] < prev_loop[1]
+               lp[2] *= prev_loop[2]
+               lp[3] = 1
+
+      return loop_infos
+
+
 
    toggle: ->
       console.log 'MemoryBro was toggled!'
       loop_infos = @findLoops()
-      console.log loop_infos
-      # if editor = atom.workspace.getActiveTextEditor()
-      #    text = editor.getText()
-      #    text_array = text.split("\n")
-      #    # console.log(text_array)
-      #
-      #    malloc_count = 0
-      #    free_count = 0
-      #
-      #    for word, index in text_array
-      #       if /malloc(...)/.test(word) and not /\/\//.test(word)  # malloc() is found
-      #          prev_line = index - 1
-      #
-      #          # Check to see if malloc() is embedded in a 'for loop'
-      #          if /(for \()/.test(text_array[prev_line])
-      #             line_array = text_array[prev_line].split(" ")  # split text buffer by space
-      #             num_iter = 0  # number at which the loop ends
-      #             start_iter = 0  # number at which the loop starts
-      #             # Iterate through each line to obtain the num_iter and start_iter values
-      #             for item, i in line_array
-      #                if line_array[i] == "="
-      #                   start_iter_loc = i + 1
-      #                   start_iter = parseInt(line_array[start_iter_loc], 10)
-      #                   console.log "Start Iter = " + start_iter
-      #
-      #                if line_array[i] == "<"
-      #                   iter_loc = i + 1
-      #                   # number of iterations is stored in a variable
-      #                   if /[a-z]/.test(line_array[iter_loc])
-      #                      variable = line_array[iter_loc].replace(';', '')
-      #                      console.log "Is variable: " + variable
-      #                      re = new RegExp("int " + variable + " = ", "g")
-      #
-      #                      for line in text_array
-      #                         if re.test(line)
-      #                            l_array = line.split(" ")
-      #                            for w, j in l_array
-      #                               if l_array[j] == "="
-      #                                  var_loc = j + 1
-      #                                  num_iter = parseInt(l_array[var_loc], 10)
-      #
-      #                   # number of iterations is explicity declared
-      #                   else
-      #                      num_iter = parseInt(line_array[iter_loc], 10)
-      #                      console.log "Num iter =  " + num_iter;
-      #
-      #                if line_array[i] == "<="
-      #                   iter_loc = i + 1
-      #                   num_iter = parseInt(line_array[iter_loc], 10) + 1
-      #                   console.log "Num iter =  " + num_iter;
-      #             malloc_count = malloc_count + (num_iter - start_iter)
-      #
-      #          else
-      #             malloc_count = malloc_count + 1
-      #
-      #
-      #
-      #    console.log "#{malloc_count} malloc(...)"
-      #    console.log "#{free_count} free(...)"
-      #
-      #    if @modalPanel.isVisible()
-      #       @modalPanel.hide()
-      #    else
-      #       @memoryBroView.setOutput(malloc_count, free_count)
-      #       @modalPanel.show()
+      loops = @postProcessLoopInfos(loop_infos)
+
+      console.log loops
+
+      if editor = atom.workspace.getActiveTextEditor()
+         text = editor.getText()
+         text_array = text.split("\n")
+
+         malloc_count = 0
+         free_count = 0
+
+         for word, index in text_array
+            if /malloc(...)/.test(word) and not /\/\//.test(word)  # malloc() is found
+               in_loop = false
+               iterations = -1
+               for loop_info in loops
+                  if index > loop_info[0] and index < loop_info[1]
+                     iterations = loop_info[2]
+                     in_loop = true
+
+               if in_loop == true
+                  malloc_count += iterations
+                  iterations = -1
+               else
+                  malloc_count += 1
+
+
+
+
+         console.log "#{malloc_count} malloc(...)"
+         console.log "#{free_count} free(...)"
+
+         if @modalPanel.isVisible()
+            @modalPanel.hide()
+         else
+            @memoryBroView.setOutput(malloc_count, free_count)
+            @modalPanel.show()
