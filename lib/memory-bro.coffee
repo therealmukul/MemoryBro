@@ -24,7 +24,6 @@ module.exports = MemoryBro =
    serialize: ->
       memoryBroViewState: @memoryBroView.serialize()
 
-
    getNumLoopIterations: (line_array, text_array) ->
       num_iter = 0
       # Iterate through each line to obtain the num_iter and start_iter values
@@ -84,7 +83,7 @@ module.exports = MemoryBro =
             end_index = i
             break
 
-      # loop_info = [<start_index>, <end_index>, <num_iters>]
+      # loop_info = [<start_index>, <end_index>, <num_iters> <visited>]
       loop_info.push(start_index)
       loop_info.push(end_index)
       loop_info.push(num_iters)
@@ -103,7 +102,6 @@ module.exports = MemoryBro =
 
          return loop_infos
 
-
    postProcessLoopInfos: (loop_infos) ->
       for lp, index in loop_infos
          if index == 0
@@ -115,8 +113,6 @@ module.exports = MemoryBro =
                lp[3] = 1
 
       return loop_infos
-
-
 
    toggle: ->
       console.log 'MemoryBro was toggled!'
@@ -146,9 +142,19 @@ module.exports = MemoryBro =
                   iterations = -1
                else
                   malloc_count += 1
+            else if /free(...)/.test(word) and not /\/\//.test(word)
+               in_loop = false
+               iterations = -1
+               for loop_info in loops
+                  if index > loop_info[0] and index < loop_info[1]
+                     iterations = loop_info[2]
+                     in_loop = true
 
-
-
+               if in_loop == true
+                  free_count += iterations
+                  iterations = -1
+               else
+                  free_count += 1
 
          console.log "#{malloc_count} malloc(...)"
          console.log "#{free_count} free(...)"
