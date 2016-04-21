@@ -115,52 +115,70 @@ module.exports = MemoryBro =
       return loop_infos
 
    toggle: ->
-      console.log 'MemoryBro was toggled!'
-      loop_infos = @findLoops()
-      loops = @postProcessLoopInfos(loop_infos)
+      if @modalPanel.isVisible()
+         @modalPanel.hide()
+         @memoryBroView.clearDOM()
+      else
+         console.log 'MemoryBro was toggled!'
+         loop_infos = @findLoops()
+         loops = @postProcessLoopInfos(loop_infos)
 
-      console.log loops
+         console.log loops
 
-      if editor = atom.workspace.getActiveTextEditor()
-         text = editor.getText()
-         text_array = text.split("\n")
+         if editor = atom.workspace.getActiveTextEditor()
+            text = editor.getText()
+            text_array = text.split("\n")
 
-         malloc_count = 0
-         free_count = 0
+            malloc_count = 0
+            free_count = 0
+            malloc_info = []
+            free_info = []
 
-         for word, index in text_array
-            if /malloc(...)/.test(word) and not /\/\//.test(word)  # malloc() is found
-               in_loop = false
-               iterations = -1
-               for loop_info in loops
-                  if index > loop_info[0] and index < loop_info[1]
-                     iterations = loop_info[2]
-                     in_loop = true
-
-               if in_loop == true
-                  malloc_count += iterations
+            for word, index in text_array
+               m_info = []
+               f_info = []
+               if /malloc(...)/.test(word) and not /\/\//.test(word)  # malloc() is found
+                  in_loop = false
                   iterations = -1
-               else
-                  malloc_count += 1
-            else if /free(...)/.test(word) and not /\/\//.test(word)
-               in_loop = false
-               iterations = -1
-               for loop_info in loops
-                  if index > loop_info[0] and index < loop_info[1]
-                     iterations = loop_info[2]
-                     in_loop = true
+                  for loop_info in loops
+                     if index > loop_info[0] and index < loop_info[1]
+                        iterations = loop_info[2]
+                        in_loop = true
 
-               if in_loop == true
-                  free_count += iterations
+                  if in_loop == true
+                     malloc_count += iterations
+                     m_info.push(index)
+                     m_info.push(iterations)
+                     malloc_info.push(m_info)
+                     iterations = -1
+                  else
+                     m_info.push(index)
+                     m_info.push(1)
+                     malloc_info.push(m_info)
+                     malloc_count += 1
+               else if /free(...)/.test(word) and not /\/\//.test(word)
+                  in_loop = false
                   iterations = -1
-               else
-                  free_count += 1
+                  for loop_info in loops
+                     if index > loop_info[0] and index < loop_info[1]
+                        iterations = loop_info[2]
+                        in_loop = true
 
-         console.log "#{malloc_count} malloc(...)"
-         console.log "#{free_count} free(...)"
+                  if in_loop == true
+                     free_count += iterations
+                     f_info.push(index)
+                     f_info.push(iterations)
+                     free_info.push(f_info)
+                     iterations = -1
+                  else
+                     f_info.push(index)
+                     f_info.push(1)
+                     free_info.push(f_info)
+                     free_count += 1
 
-         if @modalPanel.isVisible()
-            @modalPanel.hide()
-         else
-            @memoryBroView.setOutput(malloc_count, free_count)
+            # console.log "#{malloc_count} malloc(...)"
+            # console.log "#{free_count} free(...)"
+            # console.log malloc_info
+
+            @memoryBroView.setOutput(malloc_count, free_count, malloc_info, free_info)
             @modalPanel.show()
