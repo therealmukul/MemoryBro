@@ -5,6 +5,8 @@ class MemoryBroView
     @element = document.createElement('div')
     @element.classList.add('memory-bro')
 
+
+
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
@@ -19,20 +21,25 @@ class MemoryBroView
       # Create message element
       message = document.createElement('div')
       message.textContent = "#{num_mallocs} alloc and #{num_frees} frees"
-      message.classList.add('message')
+
+      if num_mallocs == num_frees
+         message.className = "msg_pos"
+      else
+         message.className = "msg_neg"
       @element.appendChild(message)
 
       for m_info in malloc_info
          line = m_info[0] + 1
          num_allocs = m_info[1]
-         console.log "Line: #{line}, Number allocations: #{num_allocs}"
+         console.log "Line: #{line} --> #{num_allocs} allocations"
 
          x = document.createElement("UL");
          x.setAttribute("id", "myUL");
          @element.appendChild(x)
 
          y = document.createElement("LI");
-         t = document.createTextNode("Line: #{line}, Number allocations: #{num_allocs}");
+         y.className = "desc"
+         t = document.createTextNode("Line: #{line} --> #{num_allocs} allocations");
          y.appendChild(t);
          document.getElementById("myUL").appendChild(y);
 
@@ -46,7 +53,8 @@ class MemoryBroView
          @element.appendChild(x)
 
          y = document.createElement("LI");
-         t = document.createTextNode("Line: #{line}, Number de-allocations: #{num_free}");
+         y.className = "desc"
+         t = document.createTextNode("Line: #{line} --> #{num_free} deallocations");
          y.appendChild(t);
          document.getElementById("myUL").appendChild(y);
 
@@ -54,3 +62,5 @@ class MemoryBroView
    clearDOM: ->
       while (@element.hasChildNodes())
          @element.removeChild(@element.lastChild);
+
+   

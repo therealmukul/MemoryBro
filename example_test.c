@@ -10,6 +10,12 @@ int int main(int argc, char const * argv[]) {
       strpy(words[i], "RPI");
    }
 
+   int k;
+   for (k = 0; k < 10; k++) {
+      free(words[k]);
+   }
+
+
    free(words);
 
    return 0;
