@@ -63,4 +63,6 @@ class MemoryBroView
       while (@element.hasChildNodes())
          @element.removeChild(@element.lastChild);
 
-   
+   updateStatusBar: ->
+      msg = "MEMEORYBRO"
+      

@@ -119,6 +119,7 @@ module.exports = MemoryBro =
          @modalPanel.hide()
          @memoryBroView.clearDOM()
       else
+         @memoryBroView.updateStatusBar()
          console.log 'MemoryBro was toggled!'
          loop_infos = @findLoops()
          loops = @postProcessLoopInfos(loop_infos)
@@ -137,7 +138,7 @@ module.exports = MemoryBro =
             for word, index in text_array
                m_info = []
                f_info = []
-               if /malloc(...)/.test(word) and not /\/\//.test(word)  # malloc() is found
+               if /malloc(...)/.test(word) or /calloc(...)/.test(word) and not /\/\//.test(word)  # malloc() is found
                   in_loop = false
                   iterations = -1
                   for loop_info in loops
