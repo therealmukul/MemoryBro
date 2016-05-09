@@ -8,3 +8,19 @@ Press ctrl + alt + n to trigger the package to determine the existence of possib
 ![good](pics/good.png)
 
 ![bad](pics/bad.png)
+
+### Contributers
+
+* [Mukul Surajiwale](https://github.com/mukulio)
+
+* [Ryan Manske](https://github.com/rymanske)
+
+* [Alwin Joy](https://github.com/alwinrobot)
+
+* [Nathan Potolsky](https://github.com/nathanpotolsky)
+
+* [Zhenyu (Victor) Zhu](https://github.com/SLiNv)
+
+# Issues and Todo
+- Add support for functions like ```open()```
+- Add suppot for ```while``` loops
