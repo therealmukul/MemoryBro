@@ -1,14 +1,18 @@
 MemoryBroView = require './memory-bro-view'
+MemoryBroStatus = require './status-bar-view'
 {CompositeDisposable} = require 'atom'
 
 module.exports = MemoryBro =
    memoryBroView: null
+   statusBarView: null
    modalPanel: null
    subscriptions: null
 
    activate: (state) ->
       @memoryBroView = new MemoryBroView(state.memoryBroViewState)
+      @statusBarView = new StatusBarView(state.memoryBroViewState)
       @modalPanel = atom.workspace.addModalPanel(item: @memoryBroView.getElement(), visible: false)
+
 
       # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
       @subscriptions = new CompositeDisposable
@@ -20,6 +24,7 @@ module.exports = MemoryBro =
       @modalPanel.destroy()
       @subscriptions.dispose()
       @memoryBroView.destroy()
+      @statusBarView.destroy()
 
    serialize: ->
       memoryBroViewState: @memoryBroView.serialize()
@@ -181,4 +186,5 @@ module.exports = MemoryBro =
             # console.log malloc_info
 
             @memoryBroView.setOutput(malloc_count, free_count, malloc_info, free_info)
+            @statusBarView.setOutput(malloc_count, free_count, malloc_info, free_info)
             @modalPanel.show()
