@@ -1,10 +1,11 @@
+StatusBarView = require './status-bar-view'
+
 module.exports =
 class MemoryBroView
   constructor: (serializedState) ->
     # Create root element
     @element = document.createElement('div')
     @element.classList.add('memory-bro')
-
 
 
   # Returns an object that can be retrieved when package is activated
@@ -63,4 +64,10 @@ class MemoryBroView
       while (@element.hasChildNodes())
          @element.removeChild(@element.lastChild);
 
-   
+
+  setupStatusBar: =>
+    return if @statusBarElement?
+    return unless atom.config.get('highlight-selected.showInStatusBar')
+    @statusBarElement = new StatusBarView()
+    @statusBarTile = @statusBar.addLeftTile(
+      item: @statusBarElement.getElement(), priority: 100)
