@@ -14,7 +14,8 @@ module.exports = MemoryBro =
       @subscriptions = new CompositeDisposable
 
       # Register command that toggles this view
-      @subscriptions.add atom.commands.add 'atom-workspace', 'memory-bro:toggle': => @toggle()
+      @subscriptions.add atom.commands.add 'atom-workspace', 'memory-bro:toggle': => @toggle('toggle')
+      @subscriptions.add atom.commands.add 'atom-workspace', 'core:save': => @toggle('save')
 
    deactivate: ->
       @modalPanel.destroy()
@@ -114,11 +115,12 @@ module.exports = MemoryBro =
 
       return loop_infos
 
-   toggle: ->
-      if @modalPanel.isVisible()
+   toggle: (type) ->
+      if @modalPanel.isVisible() && type=='toggle'
          @modalPanel.hide()
          @memoryBroView.clearDOM()
-      else
+      else if((!@modalPanel.isVisible() && type=='toggle') || (type=='save' && @modalPanel.isVisible()))
+         @memoryBroView.clearDOM()
          @memoryBroView.updateStatusBar()
          console.log 'MemoryBro was toggled!'
          loop_infos = @findLoops()
